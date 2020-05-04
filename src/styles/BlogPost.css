@@ -1,0 +1,26 @@
+.blog-post{
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+    border: 2px solid black;
+    height: 150px;
+}
+
+.avatar-img{
+    margin: 5px;
+}
+
+.blog-text-block{
+    align-items: flex-start;
+}
+
+.blog-published{
+    align-items: flex-end;
+}
+
+.blog-text {
+    margin: 5px 250px 5px 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content:  space-between;
+}

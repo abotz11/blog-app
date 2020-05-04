@@ -1,0 +1,21 @@
+.App{
+    font-family:cursive;
+}
+
+a{
+    color: blue ;
+}
+
+
+hr{
+    border: solid 1px black;
+}
+
+img{
+    height: 100px;
+    width: 100px;
+}
+
+h4, p{
+    margin: 1px;
+}
