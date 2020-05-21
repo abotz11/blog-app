@@ -1,5 +1,8 @@
-.tool-bar{
+.blog{
     display: flex;
     background-color: white;
     justify-content: space-between;
+    margin: 10px;
+    width: 100%;
+    margin-top: 30px;
 }

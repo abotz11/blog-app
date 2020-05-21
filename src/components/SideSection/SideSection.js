@@ -1,9 +1,9 @@
 import React from 'react';
-// import {Link} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 
 function SideSection(props) {
   const listItems = props.posts.map((item) => (
-    <h3>Blog post #{item} <a href="">go to page</a></h3>
+    <h3>Blog post #{item} <Link>go to page</Link></h3>
   ));
 
   return (

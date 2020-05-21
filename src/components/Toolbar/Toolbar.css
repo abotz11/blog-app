@@ -1,5 +1,10 @@
-.blog{
+
+.tool-bar{
     display: flex;
     background-color: white;
     justify-content: space-between;
+    padding: 10px;
+    top: 0;
+    width: 98%;
+    position: fixed;
 }
