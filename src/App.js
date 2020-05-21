@@ -60,13 +60,6 @@ class App extends React.Component {
             <Toolbar/>
           
             <Switch>
-              <Route exact path="/">
-              {!this.state.posts ?
-                <h4>Loading..</h4>:
-                <Blog posts={this.state.posts}/>  
-              }
-              </Route>
-
               <Route path="/aboutme">
                 <About />
               </Route>
@@ -74,9 +67,17 @@ class App extends React.Component {
               <Route path="/newpost">
                 <NewPost handleAddPost={this.handleAddPost}/>
               </Route>
+              
               <Route path="/post/:postId">
                 <Post posts={this.state.posts}/>
-              </Route> 
+              </Route>
+
+              <Route path="/">
+              {!this.state.posts ?
+                <h4>Loading..</h4>:
+                <Blog posts={this.state.posts}/>  
+              }
+              </Route>
             </Switch>
           </Router>
       </div>
