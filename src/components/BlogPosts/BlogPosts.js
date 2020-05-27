@@ -19,9 +19,9 @@ class BlogPosts extends React.Component {
                 id={item.id}
                 title={item.title} 
                 content={item.content} 
-                days={item.days} 
-                publisher={item.publisher} 
-                avatarSrc={item.avatarSrc}/> 
+                date={item.last_update} 
+                publisher={item.user_name} 
+                avatarSrc={item.img_src}/> 
         ));
     
         return (

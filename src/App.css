@@ -3,6 +3,13 @@
     margin-top: 0;
 }
 
+.resp{
+    color: black;
+    text-align: center;
+    width: 100%;
+    margin-top: 50px;
+}
+
 a{
     color: cornflowerblue ;
 }
