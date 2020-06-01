@@ -18,27 +18,27 @@ function About() {
             <ul id="menu">
                 <li>     
                     <a href="tel:+972549729340">
-                        <i class="fa fa-phone"/>
+                        <i className="fa fa-phone"/>
                     </a>
                 </li>
                 <li>
                     <a href="mailto:abotzvi.yadgarov@gmail.com">
-                        <i class="fa fa-at"/>
+                        <i className="fa fa-at"/>
                     </a>
                 </li>
                 <li>
                     <a href="https://www.facebook.com/avi.yadgarov">
-                        <i class="fa fa-facebook"/>
+                        <i className="fa fa-facebook"/>
                     </a>
                 </li>
                 <li>
                     <a href="http://www.github.com/abotz11">
-                        <i class="fa fa-github"/>
+                        <i className="fa fa-github"/>
                     </a>
                 </li>
                 <li>
                     <a href="http://www.linkedin.com/in/abotzvi-yadgarov-68ab45157/">
-                        <i class="fa fa-linkedin"/>
+                        <i className="fa fa-linkedin"/>
                     </a>
                 </li>
             </ul>      

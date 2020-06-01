@@ -3,7 +3,8 @@ import {Link} from 'react-router-dom';
 
 function SideSection(props) {
   const listItems = props.posts.map((item) => (
-    <h3>Blog post #{item} <Link>go to page</Link></h3>
+    
+    <h3 key={item}>Blog post #{item} <Link to="">go to page</Link></h3>
   ));
 
   return (
