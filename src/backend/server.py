@@ -15,18 +15,48 @@ print(db)
 
 app = Flask(__name__)
 
-@app.route('/posts', methods=['GET', 'POST'])
+@app.route('/posts', methods=['GET', 'POST', 'PUT'])
 def manage_posts():
 	if request.method == 'GET':
 		return get_all_posts()
+	elif request.method == 'PUT':
+		return edit_post()
 	else:
 		return add_post()
+
+@app.route('/comments', methods=['GET', 'POST'])
+def manage_comments():
+	if request.method == 'GET':
+		return get_all_comments()
+	else:
+		return add_comment()
+
+@app.route('/deletePost', methods=['POST'])
+def delete_post():
+	data = request.get_json()
+	print(data)
+	if not data["postId"]:
+		abort(401)
+	
+	query = "delete from comments where post = %s"
+	values = (data["postId"], )
+	cursor = db.cursor()
+	cursor.execute(query, values)
+	db.commit()
+
+	query = "delete from posts where id = %s"
+	values = (data["postId"], )
+	cursor.execute(query, values)
+	db.commit()
+	cursor.close()
+	return get_all_posts()
 
 def add_post():
 	data = request.get_json()
 	print(data)
 	if not data["user"]:
 		abort(401)
+		
 	user = get_id(data["user"])
 	now = datetime.now()
 	query = "insert into posts (user_id, title, content, last_update, published) values (%s ,%s, %s, %s, %s)"
@@ -38,6 +68,22 @@ def add_post():
 	new_post_id = cursor.lastrowid
 	cursor.close()
 	return get_post(new_post_id)
+
+def edit_post():
+	data = request.get_json()
+	print(data)
+	if not data["user"]:
+		abort(401)
+	now = datetime.now()
+
+	query = "update posts set title=%s, content=%s, last_update=%s where id=%s"
+	values = (data["title"], data["content"], now, data["id"])
+
+	cursor = db.cursor()
+	cursor.execute(query, values)
+	db.commit()
+	cursor.close()
+	return get_post(data["id"])
 
 def get_id(user_name):
 	query = "select id from users where user_name= %s"
@@ -72,6 +118,65 @@ def get_all_posts():
 	
 	return json.dumps(data, default=str)
 
+def add_comment():
+	data = request.get_json()
+	print(data)
+	if not data["user"]:
+		abort(401)
+		
+	user = get_id(data["user"])
+	now = datetime.now()
+
+	query = "insert into comments (user, post, content, last_update, published) values (%s ,%s, %s, %s, %s)"
+	values = (user, data["post"], data["content"], now, now)
+
+	cursor = db.cursor()
+	cursor.execute(query, values)
+	db.commit()
+	new_comment_id = cursor.lastrowid
+	cursor.close()
+	return get_comment(new_comment_id)
+
+def get_comment(id):
+	query = "select id, user, post, content, published, last_update from comments where id = %s"
+	values = (id, )
+	cursor = db.cursor()
+	cursor.execute(query, values)
+	record = cursor.fetchone()
+	header = ['id', 'user', 'post', 'content', 'published', 'last_update']
+	return json.dumps(dict(zip(header, record)), default=str)
+
+
+def get_all_comments():
+	user = check_login()
+	query = "select users.user_name, comments.post, comments.id, comments.content, comments.last_update from comments join posts on comments.post = posts.id join users on comments.user = users.id order by last_update"
+	cursor = db.cursor()
+	cursor.execute(query)
+	records = cursor.fetchall()
+	cursor.close()
+	print(records)
+	header = ['user_name','post', 'id', 'content', 'last_update']
+	data = []
+	
+	for r in records:
+		data.append(dict(zip(header, r)))
+	
+	return json.dumps(data, default=str)
+
+@app.route('/deleteComment', methods=['POST'])
+def delete_comment():
+	data = request.get_json()
+	print(data)
+	if not data["postId"]:
+		abort(401)
+	query = "delete from comments where id = %s"
+	values = (data["postId"], )
+	cursor = db.cursor()
+	cursor.execute(query, values)
+	db.commit()
+	cursor.close()
+	return get_all_comments()
+
 @app.route('/login', methods=['GET','POST'])
 def manage_login():
 	if request.method == 'GET':
@@ -90,10 +195,11 @@ def login():
 	if not record:
 		abort(401)
 	user_id = record[0]
-	hashed_pwd = bcrypt.hashpw(record[1].encode('utf-8'), bcrypt.gensalt())
+	hashed_pwd = record[1].encode('utf-8')
 
 	if bcrypt.hashpw(data['pass'].encode('utf-8'), hashed_pwd) != hashed_pwd:
 		abort(401)
+
 
 	session_id = str(uuid.uuid4())
 	query = "insert into sessions (user_id, session_id) values (%s, %s) on duplicate key update session_id=%s"
@@ -128,7 +234,7 @@ def get_user(user_id):
 	cursor.execute(query, values)
 	record = cursor.fetchone()
 	cursor.close()
-	print("--------------->record: ", record)
+	print(record)
 	header = ['full_name', 'user_name']
 	return json.dumps(dict(zip(header, record)), default=str)
 
@@ -137,7 +243,9 @@ def signin():
 	data = request.get_json()
 	print(data)
 	query = "insert into users (full_name, user_name, password) values (%s, %s, %s)"
-	values = (data['name'], data['user'], data['pass'])
+
+	hashed_pwd = bcrypt.hashpw(data['pass'].encode('utf-8'), bcrypt.gensalt())
+	values = (data['name'], data['user'], hashed_pwd)
 	
 	cursor = db.cursor()
 	cursor.execute(query, values)

@@ -21,9 +21,15 @@ class BlogPosts extends React.Component {
                 content={item.content} 
                 date={item.last_update} 
                 publisher={item.user_name} 
-                avatarSrc={item.img_src}/> 
+                avatarSrc={item.img_src}
+                user={this.props.user}
+                handleDeletePost={this.props.handleDeletePost}
+                handleDeleteComment={this.props.handleDeleteComment}
+                handleAddComment={this.props.handleAddComment}
+                comments={this.props.comments.filter((comment) => comment.post == item.id)}
+                />
         ));
-    
+        
         return (
             <div className="blog-posts">
                 {listItems}

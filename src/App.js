@@ -15,8 +15,9 @@ import SignIn from "./pages/SignIn/SignIn";
 class App extends React.Component {
   constructor(props){
     super(props);
-    this.state={
+    this.state = {
       posts: [],
+      comments: [],
       user: null,
       pass: null,
       name: null,
@@ -132,6 +133,7 @@ class App extends React.Component {
 
     axios.get(url)
       .then((res) => {
+        this.commentsHandler();
         this.setState({
           posts: res.data,
         });
@@ -144,6 +146,68 @@ class App extends React.Component {
       });
 
       setTimeout(() => {this.setState({resp: null})},5000)
+  }
+
+  handleAddComment = (newComment) => {
+    const url = "/comments";
+    var data = {
+      user: this.state.user,
+      content: newComment.content,
+      post: newComment.postId
+    };
+
+    axios.post(url, data)
+      .then((res) => {
+        this.postsHandler();
+        this.setState({
+          resp: "Success: comment added."
+        });
+        
+      })
+      .catch((err) => {
+        this.setState({
+          resp: "Error: failed to add comment."
+        });
+    });
+  }
+
+  commentsHandler = () =>{
+    const url = "/comments"
+
+    axios.get(url)
+      .then((res) => {
+        this.setState({
+          comments: res.data,
+        });
+      })
+      .catch((err) => {
+        this.setState({
+          comments: [],
+          resp: "Error: failed to get all comments, need to Login / Sign in."
+        });
+      });
+
+      setTimeout(() => {this.setState({resp: null})},5000)
+  }
+
+  handleDeleteComment = (postId) =>{
+    const url = "/deleteComment"
+    var data = {
+      postId: postId, 
+    };
+    axios.post(url, data)
+    .then((res) => {
+      this.postsHandler();
+      this.setState({
+        resp: "Success: comment deleted."
+      });
+    })
+    .catch((err) => {
+      this.setState({
+        posts: [],
+        resp: "Error: failed to delete comment."
+      });
+    });
   }
 
   checkIfLogedIn = () =>{
@@ -165,6 +229,62 @@ class App extends React.Component {
           isLoggedIn: false,
         });
       });
+  }
+
+  handleEditPost = (post) =>{
+    const url = "/posts"
+    var data = {
+      user: this.state.user,
+      title: post.title,
+      content: post.content, 
+      id: post.id
+    };
+
+    axios.put(url, data)
+      .then((res) => {
+        this.postsHandler();
+        this.setState({
+          resp: "Success: post edited."
+        });
+        
+      })
+      .catch((err) => {
+        this.setState({
+          resp: "Error: failed to edit post."
+        });
+    });
+  }
+
+  handleDeletePost = (postId) =>{
+    const url = "/deletePost"
+    var data = {
+      postId: postId, 
+    };
+    axios.post(url, data)
+    .then((res) => {
+      this.postsHandler();
+      this.setState({
+        resp: "Success: post deleted."
+      });
+    })
+    .catch((err) => {
+      this.setState({
+        posts: [],
+        resp: "Error: failed to delete post."
+      });
+    });
+  }
+
+  findPost = (postId) =>{
+    var foundPost = null;
+  
+    this.state.posts.forEach(post => {
+      if (post.id == postId){
+        foundPost = post;
+      }
+    });
+  
+    return foundPost;
   }
 
   componentDidMount() {
@@ -190,16 +310,31 @@ class App extends React.Component {
                 <About />
               </Route>
 
-              <Route path="/newpost">
-                <NewPost handleAddPost={this.handleAddPost} />
-              </Route>
-              
+              <Route 
+                path="/newpost"
+                render={({ location }) => {
+                  const { state } = location;
+                  return (
+                    <NewPost 
+                      handleAddPost={this.handleAddPost} 
+                      handleEditPost={this.handleEditPost} 
+                      state={state} 
+                    />
+                  )}}
+              />
+_
               <Route path="/post/:postId">
-                <Post posts={this.state.posts}/>
+                <Post findPost={this.findPost}/>
               </Route>
 
               <Route path="/" >
-                <Blog posts={this.state.posts}/>  
+                <Blog 
+                posts={this.state.posts}
+                comments={this.state.comments}
+                user={this.state.user}
+                handleDeletePost={this.handleDeletePost}
+                handleDeleteComment={this.handleDeleteComment}
+                handleAddComment={this.handleAddComment}/>  
               </Route>
             </Switch>
           </Router>

@@ -15,7 +15,8 @@
 }
 
 .blog-published{
-    align-items: flex-end;
+    display: flex;
+    justify-content: space-between;
 }
 
 .blog-text {
@@ -24,3 +25,22 @@
     flex-direction: column;
     justify-content:  space-between;
 }
+
+.modifier {
+    background-color: gainsboro;
+    width: 50%;
+    margin: 2px;
+    padding: 2px 17px; 
+    font-size: 13px;
+    font-weight: bold;
+    border: 1px solid black;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  
+
+  .modifier-content{
+    display: flex;
+    justify-content: space-evenly;
+  }
+  

@@ -1,0 +1,14 @@
+.new-comment {
+    display: block;
+    border: 2px solid black;
+    height: 100%;
+    width: 100%;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.new-comment-header{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+}

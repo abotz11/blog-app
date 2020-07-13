@@ -1,25 +1,120 @@
 import React from 'react';
-import {Link} from  'react-router-dom'
+import {Link, NavLink} from  'react-router-dom'
+import CommentsSection from "../CommentsSection/CommentsSection";
 import "./BlogPost.css";
 
-function BlogPost(props) {
-  return (
-    <div className="blog-post">
+class BlogPost extends React.Component{
+    constructor(props){
+        super(props);
+        this.state={
+            id: props.id,
+            title: props.title,
+            content: props.content,
+            date: props.date,
+            publisher: props.publisher,
+            avatarSrc: props.avatarSrc,
+            user: props.user,
+            comments: props.comments
+        }
+    }
+
+    deletePost = () =>{
+        this.props.handleDeletePost(this.state.id)
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (this.props.comments !== prevProps.comments) {
+          this.setComments();
+        }
+    
+        if (this.props.title !== prevProps.title) {
+          this.setTitle();
+        }
+
+        if (this.props.content !== prevProps.content) {
+            this.setContent();
+          }
+      }
+    
+    setComments = () =>{
+        this.setState({
+            comments: this.props.comments
+        })
+    }
+    
+    setTitle = () =>{
+        this.setState({
+            title: this.props.title
+        })
+    }
+
+    setContent = () =>{
         
-        <div className="blog-text">
-            <div className="blog-text-block">
-                <h4><Link to={`/post/${props.id}`}>{props.title}</Link></h4>
-                <p>{props.content}</p>
+        this.setState({
+            content: this.props.content
+        })
+    }
+
+    render(){
+        const {id, title, content, date, publisher, avatarSrc, user, comments} = this.state;
+        return (
+            <div className="blog-post-and-commentes">
+                <div className="blog-post"> 
+                    <div className="blog-text">
+                        <div className="blog-text-block">
+                            <h4><Link to={`/post/${id}`}>{title}</Link></h4>
+                            <p>{content}</p>
+                        </div>
+                        <div className="blog-published">                
+                            <div>Updated {getTimeOfUpdate(date)} ago by {publisher}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div className="avatar-img">
+                            <img src={avatarSrc} alt=""/>
+                        </div>
+                        
+                        <div>
+                            {(user == publisher)? 
+                                <div>
+                                    <div className="modifier-content">
+                                            <NavLink className="modifier"
+                                                to={{
+                                                    pathname:"/newpost",
+                                                    state:{ 
+                                                        title: this.state.title,
+                                                        content: this.state.content,
+                                                        id: this.state.id
+                                                    }
+                                                    }}>
+                                                <i class="fa fa-gear" aria-hidden="true"></i>
+                                            </NavLink>
+                                
+                                            <NavLink className="modifier"
+                                                to="/" 
+                                                onClick={this.deletePost} 
+                                                style={{color: "red"}}>
+                                                <i class="fa fa-trash" aria-hidden="true"></i>
+                                            </NavLink>
+                                    </div>
+                                </div>
+                                :
+                                ""}
+                        </div>
+                    </div>
+                </div>
+                <div className="blog-commentes">
+                    <CommentsSection 
+                    comments={comments}
+                    postId={id}
+                    user={user}
+                    getTimeOfUpdate={getTimeOfUpdate}
+                    handleDeleteComment={this.props.handleDeleteComment}
+                    handleAddComment={this.props.handleAddComment}/>
+                </div>
             </div>
-            <div className="blog-published">
-                <p>Updated {getTimeOfUpdate(props.date)} ago by {props.publisher}</p>
-            </div>
-        </div>
-        <div className="avatar-img">
-            <img src={props.avatarSrc} alt=""/>
-        </div>
-    </div>
-  );
+          );
+    }
 }
 
 function getTimeOfUpdate(date){
