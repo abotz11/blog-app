@@ -6,6 +6,7 @@ import uuid
 import bcrypt
 import mysql.connector.pooling
 
+
 # db = mysql.connect(
 # 	# host = "localhost",
 # 	# user = "root",
