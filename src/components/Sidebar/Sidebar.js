@@ -1,6 +1,6 @@
 import React from 'react';
 import SideSection from '../SideSection/SideSection';
-import "./Sidebar.css";
+// import "./Sidebar.css";
 
 
 function Sidebar() {

@@ -1,6 +1,6 @@
 import React from 'react';
 import {useParams} from  'react-router-dom'
-import "./Post.css"
+// import "./Post.css"
 
 function Post(props) {
   let { postId } = useParams();

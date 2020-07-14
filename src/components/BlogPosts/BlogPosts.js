@@ -1,7 +1,5 @@
 import React from 'react';
 import BlogPost from "../BlogPost/BlogPost";
-// import "../styles/Mainbar.css";
-
 
 class BlogPosts extends React.Component {
     constructor(props){

@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link, NavLink} from 'react-router-dom';
-import "./Toolbar.css";
+// import "./Toolbar.css";
 
 
 class Toolbar extends React.Component{

@@ -1,7 +1,6 @@
 import React from 'react';
 import {NavLink} from  'react-router-dom'
-// import Comment from "../Comment/Comment";
-import "./Comment.css";
+// import "./Comment.css";
 
 
 class Comment extends React.Component {

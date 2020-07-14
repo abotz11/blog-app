@@ -1,7 +1,7 @@
 import React from 'react';
 import {Link, NavLink} from  'react-router-dom'
 import CommentsSection from "../CommentsSection/CommentsSection";
-import "./BlogPost.css";
+// import "./BlogPost.css";
 
 class BlogPost extends React.Component{
     constructor(props){

@@ -1,6 +1,6 @@
 import React from 'react';
 import {NavLink} from  'react-router-dom'
-import "./NewPost.css"
+// import "./NewPost.css"
 
 class NewPost extends React.Component {
     constructor(props){

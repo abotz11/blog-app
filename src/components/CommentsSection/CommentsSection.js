@@ -1,6 +1,6 @@
 import React from 'react';
 import Comment from "../Comment/Comment";
-import "./CommentsSection.css";
+// import "./CommentsSection.css";
 import { NavLink } from 'react-router-dom';
 
 
@@ -20,9 +20,8 @@ class CommentsSection extends React.Component {
             content: this.state.newCommentContent,
             postId: this.state.postId
         }
-        
         this.props.handleAddComment(newComment);
-        window.location='/'
+        e.target.value=null
     }
 
     handleChange = (e) => {
@@ -52,8 +51,8 @@ class CommentsSection extends React.Component {
                     {listItems}
                 </div>
                 <div>
-                    {/* <div className="new-comment-header">
-                        {/* <h5>post a comment</h5>
+                    <div className="new-comment-header">
+                        <h5>post a comment</h5>
                         <h5>
                             <NavLink 
                                 className="modifier"
@@ -61,14 +60,14 @@ class CommentsSection extends React.Component {
                                 to='/'>
                                 post
                             </NavLink>
-                            </h5> 
-                    </div> */}
+                            </h5>
+                    </div>
                     <textarea
                         name="newCommentContent"
                         className="new-comment"
                         onChange={this.handleChange} 
                         placeholder="Post comment goes here..."
-                        onKeyDown={(e) => (e.keyCode == 13)? this.handleEnter(e): null}
+                        // onKeyDown={(e) => (e.keyCode == 13)? this.handleEnter(e): null}
                         
                         // value={this.state.newCommentContent}
                         >

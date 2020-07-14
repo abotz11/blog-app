@@ -1,19 +1,59 @@
-from flask import Flask, request, abort, make_response
+from flask import Flask, request, abort, make_response, g
 from datetime import datetime
 import mysql.connector as mysql
 import json
 import uuid
 import bcrypt
+import mysql.connector.pooling
 
-db = mysql.connect(
-	host = "localhost",
-	user = "root",
-	passwd = "dbpwd",
-	database = "world")
+# db = mysql.connect(
+# 	# host = "localhost",
+# 	# user = "root",
+# 	# passwd = "dbpwd",
+# 	# database = "world"
 
-print(db)
+# 	host = "my-rds.cdvhbhtikmiv.us-east-1.rds.amazonaws.com",
+# 	port = 3306,
+# 	user = "admin",
+# 	password = "admin1111",
+# 	database = "my_rds_DB")
 
-app = Flask(__name__)
+pool = mysql.connector.pooling.MySQLConnectionPool(
+	pool_name = "pool",
+	host = "my-rds.cdvhbhtikmiv.us-east-1.rds.amazonaws.com",
+	port = 3306,
+	user = "admin",
+	password = "admin1111",
+	database = "my_rds_DB",
+	buffered = True,
+	pool_size = 3
+)
+
+
+
+# print(g.db)
+
+# app = Flask(__name__)
+
+app = Flask(__name__,
+			static_folder='../frontend/build', 
+			static_url_path='/')
+
+@app.route('/') 
+def index(): 
+	return app.send_static_file('index.html')
+
+@app.route('/api/alive') 
+def api_alive(): 
+	return "alive"
+
+@app.before_request
+def before_request():
+	g.db = pool.get_connection()
+
+@app.teardown_request
+def teardown_request(exception):
+	g.db.close()
 
 @app.route('/posts', methods=['GET', 'POST', 'PUT'])
 def manage_posts():
@@ -40,14 +80,14 @@ def delete_post():
 	
 	query = "delete from comments where post = %s"
 	values = (data["postId"], )
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query, values)
-	db.commit()
+	g.db.commit()
 
 	query = "delete from posts where id = %s"
 	values = (data["postId"], )
 	cursor.execute(query, values)
-	db.commit()
+	g.db.commit()
 	cursor.close()
 	return get_all_posts()
 
@@ -62,9 +102,9 @@ def add_post():
 	query = "insert into posts (user_id, title, content, last_update, published) values (%s ,%s, %s, %s, %s)"
 	values = (user, data["title"], data["content"], now, now)
 
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query, values)
-	db.commit()
+	g.db.commit()
 	new_post_id = cursor.lastrowid
 	cursor.close()
 	return get_post(new_post_id)
@@ -79,16 +119,16 @@ def edit_post():
 	query = "update posts set title=%s, content=%s, last_update=%s where id=%s"
 	values = (data["title"], data["content"], now, data["id"])
 
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query, values)
-	db.commit()
+	g.db.commit()
 	cursor.close()
 	return get_post(data["id"])
 
 def get_id(user_name):
 	query = "select id from users where user_name= %s"
 	values = (user_name, )
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query, values)
 	record = cursor.fetchone()
 	return record[0]
@@ -96,7 +136,7 @@ def get_id(user_name):
 def get_post(id):
 	query = "select id, user_id, title, content, published, last_update from posts where id = %s"
 	values = (id, )
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query, values)
 	record = cursor.fetchone()
 	header = ['id', 'user_id', 'title', 'content', 'published', 'last_update']
@@ -105,7 +145,7 @@ def get_post(id):
 def get_all_posts():
 	user = check_login()
 	query = "select users.user_name, users.authorization, users.img_src, posts.id, title, content, last_update from posts join users on posts.user_id = users.id order by last_update desc"
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query)
 	records = cursor.fetchall()
 	cursor.close()
@@ -130,9 +170,9 @@ def add_comment():
 	query = "insert into comments (user, post, content, last_update, published) values (%s ,%s, %s, %s, %s)"
 	values = (user, data["post"], data["content"], now, now)
 
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query, values)
-	db.commit()
+	g.db.commit()
 	new_comment_id = cursor.lastrowid
 	cursor.close()
 	return get_comment(new_comment_id)
@@ -140,7 +180,7 @@ def add_comment():
 def get_comment(id):
 	query = "select id, user, post, content, published, last_update from comments where id = %s"
 	values = (id, )
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query, values)
 	record = cursor.fetchone()
 	header = ['id', 'user', 'post', 'content', 'published', 'last_update']
@@ -150,7 +190,7 @@ def get_comment(id):
 def get_all_comments():
 	user = check_login()
 	query = "select users.user_name, comments.post, comments.id, comments.content, comments.last_update from comments join posts on comments.post = posts.id join users on comments.user = users.id order by last_update"
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query)
 	records = cursor.fetchall()
 	cursor.close()
@@ -171,9 +211,9 @@ def delete_comment():
 		abort(401)
 	query = "delete from comments where id = %s"
 	values = (data["postId"], )
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query, values)
-	db.commit()
+	g.db.commit()
 	cursor.close()
 	return get_all_comments()
 
@@ -189,7 +229,7 @@ def login():
 	print(data)
 	query = "select id, password from users where user_name = %s"
 	values = (data['user'], )
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query, values)
 	record = cursor.fetchone()
 	if not record:
@@ -205,7 +245,7 @@ def login():
 	query = "insert into sessions (user_id, session_id) values (%s, %s) on duplicate key update session_id=%s"
 	values = (user_id, session_id, session_id)
 	cursor.execute(query, values)
-	db.commit()
+	g.db.commit()
 	resp = make_response()
 	resp.set_cookie("session_id", session_id)
 	return resp
@@ -217,7 +257,7 @@ def check_login():
 		abort(401)
 	query = "select user_id from sessions where session_id = %s"
 	values = (session_id, )
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query, values)
 	record = cursor.fetchone()
 	cursor.close()
@@ -230,7 +270,7 @@ def check_login():
 def get_user(user_id):
 	query = "select full_name, user_name from users where id= %s"
 	values = (user_id, )
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query, values)
 	record = cursor.fetchone()
 	cursor.close()
@@ -247,16 +287,16 @@ def signin():
 	hashed_pwd = bcrypt.hashpw(data['pass'].encode('utf-8'), bcrypt.gensalt())
 	values = (data['name'], data['user'], hashed_pwd)
 	
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query, values)
-	db.commit()
+	g.db.commit()
 	user_id = cursor.lastrowid
 
 	session_id = str(uuid.uuid4())
 	query = "insert into sessions (user_id, session_id) values (%s, %s) on duplicate key update session_id=%s"
 	values = (user_id, session_id, session_id)
 	cursor.execute(query, values)
-	db.commit()
+	g.db.commit()
 	resp = make_response()
 	resp.set_cookie("session_id", session_id)
 	return resp
@@ -267,13 +307,13 @@ def logout():
 	print(data)
 	query = "delete from sessions where user_id = %s"
 	values = (get_id(data['user']),)
-	cursor = db.cursor()
+	cursor = g.db.cursor()
 	cursor.execute(query, values)
-	db.commit()
+	g.db.commit()
 
 	resp = make_response()
 	resp.set_cookie("session_id", '', expires=0)
 	return resp
 
-if __name__ == "__main__":
-	app.run()
+# if __name__ == "__main__":
+# 	app.run()
